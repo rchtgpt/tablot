@@ -24,7 +24,7 @@ async def on_message(message):
     if message.content.startswith('$ts about'):
         await message.channel.send("Hello Future Coder I am the official discord bot of Tech Syndicate Server. I was created in June 202 by the best developers Amity has ever seen. I perform the following functions :- \n 1. $ts ping - check the bot's latency (j) \n 2. $ts github - display github repo (j) \n 3. $ts stats - as the name suggests  4. ts show 'file name' ")
 
-    if message.content.startswith(f'!ts show "'):
+    if message.content.startswith(f'$ts show "'):
         if message.content[-1] != '"':
             await message.channel.send('bhai naam toh dhang se likh le')
         else:
