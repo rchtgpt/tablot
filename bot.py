@@ -7,7 +7,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-# before pushing remove this
+
 client = discord.Client()
 
 # table data
@@ -21,7 +21,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content.startswith(f"_ts about"):
+    if message.content.startswith('$ts about'):
         await message.channel.send("Hello Future Coder I am the official discord bot of Tech Syndicate Server. I was created in June 202 by the best developers Amity has ever seen. I perform the following functions :- \n 1. $ts ping - check the bot's latency (j) \n 2. $ts github - display github repo (j) \n 3. $ts stats - as the name suggests  4. ts show 'file name' ")
 
     if message.content.startswith(f'!ts show "'):
@@ -44,10 +44,10 @@ async def on_message(message):
                 await message.channel.send('pls junos dis is incorrect file name')
 
 client.run(TOKEN)
-#Replace it with "TOKEN"
+
 # web scraping - future?
 # email: mihir-462@tablot-280404.iam.gserviceaccount.com
-# When pushing remove the token
+
 '''
 Commands: 
 1. $ts about - bot introduces itself ($hello --> $about)
