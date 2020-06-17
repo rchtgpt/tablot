@@ -16,14 +16,6 @@ we are working on this just for the sake of getting familiarized with <a href='h
 > It's like one of those small things that makes your life 1% easier <3
 > ~ clash
 
-## requirements
-* requires python 
-* requires python-dotenv 
-* requires terminaltables
-
-"hi rachit, pls create `requirements.txt` file" <br>
-"ok"
-
 ## commands
 
 #### about
@@ -39,8 +31,7 @@ command: `$stats`
 action: shows bot statistics and technical data
 
 ## building from source
-Install everything written in "requirements" with pip install.
-(or wait for rachit to create `requirements.txt`)
+Install everything written in `requirements.txt` with pip install.
 
 `cd` to `tablot` directory.
 
