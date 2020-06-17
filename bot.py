@@ -6,7 +6,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 prefix = '$ts'
 
@@ -137,6 +136,6 @@ async def on_message(message):
 """).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
-client.run(TOKEN)
+client.run(os.environ.get('TOKEN'))
 
 # email: mihir-462@tablot-280404.iam.gserviceaccount.com
