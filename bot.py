@@ -4,13 +4,12 @@ from dotenv import load_dotenv
 from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 prefix = '$ts'
-# table data
+
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/spreadsheets",
          "https://www.googleapis.com/auth/drive.file",
