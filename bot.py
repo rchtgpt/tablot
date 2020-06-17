@@ -15,7 +15,21 @@ scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/spreadsheets",
          "https://www.googleapis.com/auth/drive.file",
          "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+
+cred = {
+    "type": os.environ.get('TYPE'),
+    "project_id": os.environ.get('PROJECT_ID'),
+    "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
+    "private_key": os.environ.get('PRIVATE_KEY').replace('\\n', '\n'),
+    "client_email": os.environ.get('CLIENT_EMAIL'),
+    "client_id": os.environ.get('CLIENT_ID'),
+    "auth_uri": os.environ.get('AUTH_URI'),
+    "token_uri": os.environ.get('TOKEN_URI'),
+    "auth_provider_x509_cert_url": os.environ.get('AUTH_PROVIDER_CERT_URL'),
+    "client_x509_cert_url": os.environ.get('CLIENT_CERT_URL')
+}
+
+creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 
 
@@ -81,7 +95,7 @@ async def on_message(message):
                 value='Tablot helps you conveniently display your google sheets data on a discord server.',
                 inline=False).add_field(
                 name='Owner',
-                value='Tech Syndicate; check us on [GitHub](https://github.com/techsyndicate).',
+                value='Tech Syndicate; check us out on [GitHub](https://github.com/techsyndicate).',
                 inline=False
             ).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
