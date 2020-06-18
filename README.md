@@ -19,16 +19,20 @@ we are working on this just for the sake of getting familiarized with <a href='h
 ## commands
 
 #### about
-command: `$about`
+command: `$ts about` <br>
 action: bot introduces itself
 
 #### ping
-command: `$ping`
-action: pings bot, returns bot latency in `ms`
+command: `$ts stats`<br>
+action: returns bot latency in `ms`
 
-#### stats
-command: `$stats`
-action: shows bot statistics and technical data
+#### full gsheet
+command: `$ts show "<google sheet link>"`<br>
+action: displays the whole table
+
+### gsheet specific value
+command: `$ts show "<google sheet link>" value`<br>
+action: displays rows corresponding to the specific value
 
 ## building from source
 Install everything written in `requirements.txt` with pip install.

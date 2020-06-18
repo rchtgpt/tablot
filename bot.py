@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from bs4 import BeautifulSoup
+import requests
 
 load_dotenv()
 client = discord.Client()
@@ -30,6 +32,15 @@ cred = {
 creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 
+def webScraper(link):
+    # web scraping to get sheet name
+    source = requests.get(f'{link}').text
+    soup = BeautifulSoup(source, 'lxml')
+    sheetName = [title for title in soup.find_all('title')]
+    name = str(sheetName[0])
+    finalSheetName = name[7:-24]
+    return finalSheetName
+
 
 @client.event
 async def on_ready():
@@ -42,45 +53,53 @@ async def on_message(message):
         if message.content[-1] != '"':
             a = message.content.split('"')
             if len(a) < 3:
-                await message.channel.send('The command syntax is incorrect. \
-                    Please use `$ts help` to check the commands.')
-            try:
-                sheet = gClient.open(a[1]).sheet1
-            except:
-                await message.channel.send('Make sure the sheet name is correct. \
-                    Also, if you haven\'t already, please share your google sheet with \
-                        `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
-            data = sheet.findall(a[2][1:])
-            tableData = []
-            tableData.append(sheet.row_values(1))
-            for i in data:
-                tableData.append(sheet.row_values(i.row))
-            final = ''
-            for i in tableData:
-                if tableData[tableData.index(i)] == tableData[-1]:
-                    break
-                else:
-                    for j in range(len(i)):
-                        final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
-                    await message.channel.send(f'```{final}```')
+                await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
+            else:
+                try:
+                    a = message.content.split('"')
+                    link = a[1][1:-1]
+                    sheetName = webScraper(link)
+                    sheet = gClient.open(sheetName).sheet1
+                    data = sheet.findall(a[2][1:])
+                    tableData = []
+                    tableData.append(sheet.row_values(1))
+                    for i in data:
+                        tableData.append(sheet.row_values(i.row))
                     final = ''
+                    for i in tableData:
+                        if tableData[tableData.index(i)] == tableData[-1]:
+                            break
+                        else:
+                            for j in range(len(i)):
+                                final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
+                            await message.channel.send(f'```{final}```')
+                            final = ''
+                except:
+                    await message.channel.send('Make sure the sheet name is correct. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+
         else:
             try:
                 a = message.content.split('"')
-                sheet = gClient.open(a[1]).sheet1
-                data = sheet.get_all_records()
+                link = a[1][1:-1]
+                sheetName = webScraper(link)
 
-                tableData = [[key for key in data[0].keys()]]
-                for i in data:
-                    val = [value for value in i.values()]
-                    tableData.append(val)
+                if link.startswith('https://docs.google.com/spreadsheets/d/'):
+                    sheet = gClient.open(sheetName).sheet1
+                    data = sheet.get_all_records()
 
-                table = AsciiTable(tableData)
-                await message.channel.send(f'```{table.table}```')
+                    tableData = [[key for key in data[0].keys()]]
+                    for i in data:
+                        val = [value for value in i.values()]
+                        tableData.append(val)
+
+                    table = AsciiTable(tableData)
+                    await message.channel.send(f'```{table.table}```')
+
+                else:
+                    await message.channel.send('Make sure the google sheet link is correct. Also, if your google sheet is private, please share it with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+
             except:
-                await message.channel.send('Make sure the sheet name is correct. \
-                    Also, if you haven\'t already, please share your google sheet with \
-                        `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                await message.channel.send('Make sure the google sheet link is correct. Also, if your google sheet is private, please share it with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
 
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
@@ -131,8 +150,8 @@ async def on_message(message):
 
 **Google Sheets:**
 
-`show "file name"` - To display the whole table
-`show "file name" value` - To display rows of specific value
+`show "<google sheet link>"` - To display the whole table
+`show "<google sheet link>" value` - To display rows of specific value
 """).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
