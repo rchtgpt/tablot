@@ -1,13 +1,9 @@
 import discord
 import os
-from dotenv import load_dotenv
 from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from bs4 import BeautifulSoup
-import requests
 
-load_dotenv()
 client = discord.Client()
 prefix = '$ts'
 
@@ -32,14 +28,6 @@ cred = {
 creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 
-def webScraper(link):
-    # web scraping to get sheet name
-    source = requests.get(f'{link}').text
-    soup = BeautifulSoup(source, 'lxml')
-    sheetName = [title for title in soup.find_all('title')]
-    name = str(sheetName[0])
-    finalSheetName = name[7:-24]
-    return finalSheetName
 
 @client.event
 async def on_ready():
@@ -56,8 +44,7 @@ async def on_message(message):
                 try:
                     a = message.content.split('"')
                     link = a[1][1:-1]
-                    sheetName = webScraper(link)
-                    sheet = gClient.open(sheetName).sheet1
+                    sheet = gClient.open_by_url(link).sheet1
                     data = sheet.findall(a[2][1:])
                     tableData = []
                     tableData.append(sheet.row_values(1))
@@ -79,10 +66,9 @@ async def on_message(message):
             try:
                 a = message.content.split('"')
                 link = a[1][1:-1]
-                sheetName = webScraper(link)
 
                 if link.startswith('https://docs.google.com/spreadsheets/d/'):
-                    sheet = gClient.open(sheetName).sheet1
+                    sheet = gClient.open_by_url(link).sheet1
                     data = sheet.get_all_records()
 
                     tableData = [[key for key in data[0].keys()]]
