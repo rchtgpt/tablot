@@ -71,10 +71,10 @@ async def on_message(message):
                 link = a[1][1:-1]
                 if link.startswith('https://docs.google.com/spreadsheets/d/'):
                     sheet = gClient.open_by_url(link).sheet1
-                    data = sheet.get_all_records()
-                    tableData = [[key for key in data[0].keys()]]
-                    for i in data:
-                        val = [value for value in i.values()]
+                    data = sheet.get_all_values()
+                    tableData = [data[0]]
+                    for i in range(1, len(data)):
+                        val = [k for k in data[i]]
                         tableData.append(val)
 
                     table = AsciiTable(tableData)
