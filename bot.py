@@ -73,7 +73,7 @@ async def on_message(message):
                             await message.channel.send(f'```{final}```')
                             final = ''
                 except:
-                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
         else:
             try:
@@ -94,15 +94,16 @@ async def on_message(message):
                     await message.channel.send(f'```{table.table}```')
 
                 else:
-                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
-            except:
-                await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+            except Exception as e:
+                print(e)
+                await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
                               description='To get started, simply share your google sheet\
-                                   with me at `mihir-462@tablot-280404.iam.gserviceaccount.com`, \
+                                   with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, \
                                        and type `$ts help` for a list of commands',
                               colour=1499502) \
             .add_field(
@@ -116,6 +117,12 @@ async def on_message(message):
         await message.channel.send(embed=embed)
 
     if message.content.startswith(f'{prefix} stats'):
+
+        name_list = []
+        for g in client.guilds:
+            for s in g.members:
+                name_list.append(s.name)
+
         embed = discord.Embed(
             title=f'Description',
             description='',
@@ -129,7 +136,7 @@ async def on_message(message):
             value=f'{round(client.latency * 1000, 2)}ms',
             inline=True
         ).add_field(name='User Count',
-            value=len([s.members for s in client.guilds]))\
+            value=len(name_list))\
                 .set_footer(text='Made by Tech Syndicate',
                 icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
@@ -155,4 +162,4 @@ async def on_message(message):
 
 client.run(os.environ.get('TOKEN'))
 
-# email: mihir-462@tablot-280404.iam.gserviceaccount.com
+# email: techsyndicate@tablot-280818.iam.gserviceaccount.com
