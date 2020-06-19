@@ -73,7 +73,7 @@ async def on_message(message):
                             await message.channel.send(f'```{final}```')
                             final = ''
                 except:
-                    await message.channel.send('Make sure that the link is correct. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
 
         else:
             try:
@@ -94,10 +94,10 @@ async def on_message(message):
                     await message.channel.send(f'```{table.table}```')
 
                 else:
-                    await message.channel.send('Make sure that the link is correct. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
 
             except:
-                await message.channel.send('Make sure that the link is correct. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
+                await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `mihir-462@tablot-280404.iam.gserviceaccount.com`.')
 
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
