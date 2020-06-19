@@ -41,11 +41,9 @@ def webScraper(link):
     finalSheetName = name[7:-24]
     return finalSheetName
 
-
 @client.event
 async def on_ready():
     print('i\'m ready to get back to work')
-
 
 @client.event
 async def on_message(message):
