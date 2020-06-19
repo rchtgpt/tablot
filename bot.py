@@ -83,7 +83,6 @@ async def on_message(message):
                     await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
             except Exception as e:
-                print(e)
                 await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
     if message.content.startswith(f'{prefix} about'):
@@ -104,10 +103,10 @@ async def on_message(message):
 
     if message.content.startswith(f'{prefix} stats'):
 
-        name_list = []
+        name_list = set()
         for g in client.guilds:
             for s in g.members:
-                name_list.append(s.name)
+                name_list.add(s.name)
 
         embed = discord.Embed(
             title=f'Description',
@@ -122,7 +121,7 @@ async def on_message(message):
             value=f'{round(client.latency * 1000, 2)}ms',
             inline=True
         ).add_field(name='User Count',
-            value=len(name_list))\
+            value=len(name_list) - 1)\
                 .set_footer(text='Made by Tech Syndicate',
                 icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
