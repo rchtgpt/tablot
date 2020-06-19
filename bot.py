@@ -3,6 +3,7 @@ import os
 from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import datetime, time
 
 client = discord.Client()
 prefix = '$ts'
@@ -27,11 +28,13 @@ cred = {
 
 creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
-
+start_time = 0
 
 @client.event
 async def on_ready():
     print('i\'m ready to get back to work')
+    global start_time
+    start_time = time.time()
 
 @client.event
 async def on_message(message):
@@ -66,11 +69,9 @@ async def on_message(message):
             try:
                 a = message.content.split('"')
                 link = a[1][1:-1]
-
                 if link.startswith('https://docs.google.com/spreadsheets/d/'):
                     sheet = gClient.open_by_url(link).sheet1
                     data = sheet.get_all_records()
-
                     tableData = [[key for key in data[0].keys()]]
                     for i in data:
                         val = [value for value in i.values()]
@@ -108,6 +109,9 @@ async def on_message(message):
             for s in g.members:
                 name_list.add(s.name)
 
+        current_time = time.time()
+        difference = int(round(current_time - start_time))
+
         embed = discord.Embed(
             title=f'Description',
             description='',
@@ -117,11 +121,16 @@ async def on_message(message):
             value=len([s for s in client.guilds]),
             inline=True
         ).add_field(
+            name='User Count',
+            value=len(name_list) - 1,
+            inline=True
+        ).add_field(
             name='Latency',
             value=f'{round(client.latency * 1000, 2)}ms',
             inline=True
-        ).add_field(name='User Count',
-            value=len(name_list) - 1)\
+        ).add_field(
+            name='Uptime',
+            value=datetime.timedelta(seconds=difference))\
                 .set_footer(text='Made by Tech Syndicate',
                 icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
