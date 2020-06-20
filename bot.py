@@ -88,9 +88,7 @@ async def on_message(message):
 
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
-                              description='To get started, simply share your google sheet\
-                                   with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, \
-                                       and type `$ts help` for a list of commands',
+                              description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` for a list of commands',
                               colour=1499502) \
             .add_field(
                 name='Tablot',
@@ -113,7 +111,7 @@ async def on_message(message):
         difference = int(round(current_time - start_time))
 
         embed = discord.Embed(
-            title=f'Description',
+            title='Statistics',
             description='',
             colour=1499502,
         ).add_field(
