@@ -43,13 +43,16 @@ async def on_ready():
 async def on_member_join(member):
     try:
         guild_name = member.guild
+        guild_owner = member.guild.owner
+        owner = member.guild.owner.id
 
         await member.create_dm()
         await member.dm_channel.send(
             f'''Hey {member.name}, welcome to the official server of {guild_name}
         
-To use the various channels of {guild_name}, please introduce yourself in `#introduction` using the format given below.
+To use the various channels of {guild_name}, please introduce yourself in `#introductions` using the format given below.
         ```
+$ts introduce
 name: "name"
 school: "school_name"
 event: "event_name"
@@ -57,15 +60,33 @@ email: "email_id" ```
         '''
         )
 
+        checker = False
+        for c in member.guild.channels:
+            if 'introductions' in c.name:
+                checker = True
+                break
+        if not checker:
+            await member.create_dm()
+            await member.dm_channel.send(
+                f'<@{owner}> is creating `#introductions` pls be patient'
+            )
+            await guild_owner.create_dm()
+            await guild_owner.dm_channel.send(
+                f'<@{owner}>, ik you\'re cool but u might wanna create `#introductions` in {guild_name}'
+            )
+
     except Exception as e:
         print(e)
     
-
 @client.event
 async def on_message(message):
+    if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
+        #if successful
+        user = message.author
+        await user.add_roles(discord.utils.get(user.guild.roles, name = 'test'))
+
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
-            #if message.content[-1] != '"':
             global sheetVar, link
             a = message.content.split('"')
             if len(a) == 3 and a[-1]!='':
