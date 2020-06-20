@@ -65,9 +65,14 @@ email: "email_id" ```
 async def on_message(message):
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
-            if message.content[-1] != '"':
-                global sheetVar, link
-                a = message.content.split('"')
+            #if message.content[-1] != '"':
+            global sheetVar, link
+            a = message.content.split('"')
+            if len(a) == 3 and a[-1]!='':
+                try:
+                    try_sheet = gClient.open_by_url(a[1][1:-1]).sheet1
+                except Exception:
+                    await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
                 sheetVar = a[2].strip()
                 link = a[1][1:-1]
                 d[sheetVar] = link
@@ -189,7 +194,7 @@ async def on_message(message):
             title="Tablot's commands:",
             colour=1499502,
             description="""
-> To use a  command type `$ts <command>`.
+> To use a command, type `$ts <command>`.
 
 **General:**
 
@@ -198,8 +203,10 @@ async def on_message(message):
 
 **Google Sheets:**
 
-`show "<google sheet link>"` - To display the whole table
-`show "<google sheet link>" value` - To display rows of specific value
+`link "<link>" variable_name` - To assign a variable to the link (only server owner)
+`show variable_name` - To display the table stored in the variable
+`show "<link>"` - To display the whole table
+`show "<link>" value` - To display rows of specific value
 """).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
