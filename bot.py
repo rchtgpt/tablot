@@ -7,6 +7,9 @@ import datetime, time
 
 client = discord.Client()
 prefix = '$ts'
+d = {}
+sheetVar = ''
+link = ''
 
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/spreadsheets",
@@ -60,7 +63,32 @@ email: "email_id" ```
 
 @client.event
 async def on_message(message):
-    if message.content.startswith(f'{prefix} show '):
+    if message.content.startswith(f'{prefix} link'):
+        if message.author == message.guild.owner:
+            if message.content[-1] != '"':
+                global sheetVar, link
+                a = message.content.split('"')
+                sheetVar = a[2].strip()
+                link = a[1][1:-1]
+                d[sheetVar] = link
+                await message.channel.send(f'the assigned variable is {sheetVar}')
+            else:
+                await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
+        else:
+            await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
+
+    for variables in d.keys():
+        if message.content == f'{prefix} show {variables}':
+            sheet = gClient.open_by_url(d[variables]).sheet1
+            data = sheet.get_all_values()
+            tableData = [data[0]]
+            for i in range(1, len(data)):
+                val = [k for k in data[i]]
+                tableData.append(val)
+            table = AsciiTable(tableData)
+            await message.channel.send(f'```{table.table}```')
+
+    if message.content.startswith(f'{prefix} show ') and '"' in message.content:
         if message.content[-1] != '"':
             a = message.content.split('"')
             if len(a) < 3:
@@ -68,6 +96,7 @@ async def on_message(message):
             else:
                 try:
                     a = message.content.split('"')
+                    print(a)
                     link = a[1][1:-1]
                     sheet = gClient.open_by_url(link).sheet1
                     data = sheet.findall(a[2][1:])
