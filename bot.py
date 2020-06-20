@@ -37,6 +37,28 @@ async def on_ready():
     start_time = time.time()
 
 @client.event
+async def on_member_join(member):
+    try:
+        guild_name = member.guild
+
+        await member.create_dm()
+        await member.dm_channel.send(
+            f'''Hey {member.name}, welcome to the official server of {guild_name}
+        
+To use the various channels of {guild_name}, please introduce yourself in `#introduction` using the format given below.
+        ```
+name: "name"
+school: "school_name"
+event: "event_name"
+email: "email_id" ```
+        '''
+        )
+
+    except Exception as e:
+        print(e)
+    
+
+@client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} show '):
         if message.content[-1] != '"':
