@@ -282,6 +282,11 @@ async def on_message(message):
 
     if message.content.startswith(f'{prefix} stats'):
 
+        name_list = set()
+        for g in client.guilds:
+            for s in g.members:
+                name_list.add(s.name)
+
         current_time = time.time()
         difference = int(round(current_time - start_time))
 
@@ -295,7 +300,7 @@ async def on_message(message):
             inline=True
         ).add_field(
             name='User Count',
-            value=len([s for s in client.guilds]),
+            value=len(name_list) - 1,
             inline=True
         ).add_field(
             name='Latency',
