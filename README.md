@@ -18,29 +18,51 @@ we are working on this just for the sake of getting familiarized with <a href='h
 
 ## commands
 
-#### about
+### general commands
+
+**about**
 command: `$ts about` <br>
 action: bot introduces itself
 
-#### ping
+**ping**
 command: `$ts stats`<br>
 action: returns bot latency in `ms`
 
-#### assign name to gsheet link (only the ~~owner~~ admin can do)
-command: `$ts link <"link"> variableName`<br>
-action: assigns a name to the link provided by the admin
 
-#### full gsheet using defined name
-command: `$ts show variableName` <br>
-action: displays the whole table
+### gsheet commands
 
-#### full gsheet using gsheet link
+#### using google sheets link
+
+**full gsheet using gsheet link**
 command: `$ts show "<google sheet link>"`<br>
 action: displays the whole table
 
-### gsheet specific value
-command: `$ts show "<google sheet link>" value`<br>
-action: displays rows corresponding to the specific value
+**gsheet link specific rows**
+command: `$ts show "<google sheet link>" row value`<br>
+action: displays rows belonging to the specified value
+
+**gsheet link specific columns**
+command: `$ts show "<google sheet link>" col value`<br>
+action: displays a specific column using column name
+
+#### using owner defined link variable
+
+**assign name to gsheet link (only the *owner* can do)**
+command: `$ts link <"link"> linkVariable`<br>
+action: assigns a name to the link provided by the owner
+
+**full gsheet using owner defined link variable**
+command: `$ts show variableName` <br>
+action: displays the whole table
+
+**gsheet linkVariable specific rows**
+command: `$ts show linkVariable row value`<br>
+action: displays rows belonging to the specified value
+
+**gsheet link specific columns**
+command: `$ts show linkVariable col value`<br>
+action: displays a specific column using column name as value
+
 
 ## building from source
 Install everything written in `requirements.txt` with pip install.

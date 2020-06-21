@@ -38,11 +38,13 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 start_time = 0
 
+
 @client.event
 async def on_ready():
     print('i\'m ready to get back to work')
     global start_time
     start_time = time.time()
+
 
 @client.event
 async def on_member_join(member):
@@ -82,6 +84,7 @@ email: "email_id" ```
 
     except Exception as e:
         print(e)
+
 
 @client.event
 async def on_message(message):
@@ -124,6 +127,7 @@ async def on_message(message):
             db.collection(u'registered users').document(u'{}'.format(message.guild.id)).set({
                 u'ids': add
             })
+
         user = message.author
         try:
             await user.add_roles(discord.utils.get(user.guild.roles, name='test'))
@@ -151,7 +155,7 @@ async def on_message(message):
         else:
             await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
 
-    for vars in d.keys():
+    for vars in d:
         if message.content == f'{prefix} show {vars}':
             a = message.content.split()
             sheet = gClient.open_by_url(d[vars]).sheet1
@@ -187,10 +191,8 @@ async def on_message(message):
             if len(a) > 3:
                 sheet = gClient.open_by_url(d[vars]).sheet1
                 tableData = sheet.row_values(1)
-                final = ''
                 if a[-1] in tableData:
                     table = tableData.index(a[-1])
-                    print(table)
                     colVals = sheet.col_values(table + 1)
                     lst = []
                     for i in colVals:
@@ -209,20 +211,34 @@ async def on_message(message):
                 try:
                     link = a[1][1:-1]
                     sheet = gClient.open_by_url(link).sheet1
-                    data = sheet.findall(a[2][1:])
-                    tableData = list()
-                    tableData.append(sheet.row_values(1))
-                    for i in data:
-                        tableData.append(sheet.row_values(i.row))
-                    final = ''
-                    for i in tableData:
-                        if tableData[tableData.index(i)] == tableData[-1]:
-                            break
-                        else:
-                            for j in range(len(i)):
-                                final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
-                            await message.channel.send(f'```{final}```')
-                            final = ''
+                    if message.content.startswith(f'{prefix} show "<{link}>" row '):
+                        j = message.content.split(" ", 5)
+                        data = sheet.findall(j[-1])
+                        tableData = list()
+                        tableData.append(sheet.row_values(1))
+                        for i in data:
+                            tableData.append(sheet.row_values(i.row))
+                        final = ''
+                        for i in tableData:
+                            if tableData[tableData.index(i)] == tableData[-1]:
+                                break
+                            else:
+                                for j in range(len(i)):
+                                    final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
+                                await message.channel.send(f'```{final}```')
+                                final = ''
+
+                    if message.content.startswith(f'{prefix} show "<{link}>" col '):
+                        j = message.content.split(" ", 5)
+                        sheet = gClient.open_by_url(link).sheet1
+                        tableData = sheet.row_values(1)
+                        if j[-1] in tableData:
+                            table = tableData.index(j[-1])
+                            colVals = sheet.col_values(table + 1)
+                            lst = []
+                            for i in colVals:
+                                lst.append([i])
+                            await message.channel.send(f'```{AsciiTable(lst).table}```')
                 except:
                     await message.channel.send(
                         'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
@@ -250,7 +266,6 @@ async def on_message(message):
                 await message.channel.send(
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
-
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
                               description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` for a list of commands',
@@ -267,11 +282,6 @@ async def on_message(message):
 
     if message.content.startswith(f'{prefix} stats'):
 
-        name_list = set()
-        for g in client.guilds:
-            for s in g.members:
-                name_list.add(s.name)
-
         current_time = time.time()
         difference = int(round(current_time - start_time))
 
@@ -285,7 +295,7 @@ async def on_message(message):
             inline=True
         ).add_field(
             name='User Count',
-            value=len(name_list) - 1,
+            value=len([s for s in client.guilds]),
             inline=True
         ).add_field(
             name='Latency',
@@ -305,20 +315,27 @@ async def on_message(message):
             description="""
 > To use a command, type `$ts <command>`.
 
-**General:**
+**__General__**
 
 `about` - To know about the bot.
 `stats` - To check the bot's stats.
 
-**Google Sheets:**
+**__Google Sheets__**
 
-`link "<link>" variable_name` - To assign a variable to the link (only server owner)
-`show variable_name` - To display the table stored in the variable
+Using google sheet link:
+
 `show "<link>"` - To display the whole table
-`show "<link>" value` - To display rows of specific value
+`show "<link>" row value` - To display rows belonging to a specific value
+`show "<link>" col value` - To display a specific column
+
+Using owner defined link variable:
+
+`link "<link>" linkVariable` - To assign a variable to the link (*only server owner*)
+`show linkVariable` - To display the table stored in the link variable
+`show linkVariable row value` - To display rows of specific value
+`show linkVariable col value` - To display a specific column
 """).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
 client.run(os.environ.get('TOKEN'))
-
 # email: techsyndicate@tablot-280818.iam.gserviceaccount.com
