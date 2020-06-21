@@ -4,6 +4,8 @@ from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import datetime, time
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 client = discord.Client()
 prefix = '$ts'
@@ -28,6 +30,9 @@ cred = {
     "auth_provider_x509_cert_url": os.environ.get('AUTH_PROVIDER_CERT_URL'),
     "client_x509_cert_url": os.environ.get('CLIENT_CERT_URL')
 }
+
+firebase_admin.initialize_app(credentials.Certificate(cred))
+db = firestore.client()
 
 creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
@@ -81,20 +86,44 @@ email: "email_id" ```
 @client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
-        # if successful
         sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         total = sheet.get_all_values()
         indi = message.content.split('\n')[1:]
         final_add = []
         for i in indi:
             final_add.append(i.split(":")[1].strip()[1:-1])  # to remove quotes
-        print(final_add)
-        sheet.insert_row(final_add, len(total) + 1)
-        await message.channel.send("Information added successfully :grinning:")
-
-        # put registered users uid in database
-        # use if to check if the user has already done it
-
+        final_add.append(f'{message.author}')
+        col_doc = db.collection(u'registered users').document(u'{}'.format(message.guild.id))
+        doc_val = col_doc.get()
+        if doc_val.exists:
+            doc = doc_val.to_dict()
+            check = False
+            for dv in doc.values():
+                if message.author.id not in dv:
+                    check = False
+                else:
+                    check = True
+                    break
+            if not check:
+                sheet.insert_row(final_add, len(total) + 1)
+                await message.channel.send("Information added successfully :grinning:")
+                col_doc.update({u'ids': firestore.ArrayUnion([message.author.id])})
+            else:
+                all_values = sheet.get_all_values()
+                for i in all_values:
+                    if i[-1] == str(message.author):
+                        ind = all_values.index(i)
+                        break
+                for i in range(1, len(final_add) + 1):
+                    sheet.update_cell(ind+1, i, final_add[i-1])
+                await message.channel.send("Information updated successfully :grinning:")
+        else:
+            add = [message.author.id]
+            sheet.insert_row(final_add, len(total) + 1)
+            await message.channel.send("Information added successfully :grinning:")
+            db.collection(u'registered users').document(u'{}'.format(message.guild.id)).set({
+                u'ids': add
+            })
         user = message.author
         try:
             await user.add_roles(discord.utils.get(user.guild.roles, name='test'))
@@ -123,7 +152,6 @@ async def on_message(message):
             await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
 
     for vars in d.keys():
-
         if message.content == f'{prefix} show {vars}':
             a = message.content.split()
             sheet = gClient.open_by_url(d[vars]).sheet1
