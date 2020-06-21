@@ -90,6 +90,7 @@ async def on_message(message):
             final_add.append(i.split(":")[1].strip()[1:-1]) #to remove quotes
         print(final_add)
         sheet.insert_row(final_add, len(total) + 1)
+        await message.channel.send("Information added successfully :grin:")
 
         # put registered users uid in database
         # use if to check if the user has already done it
