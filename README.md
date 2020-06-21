@@ -26,7 +26,15 @@ action: bot introduces itself
 command: `$ts stats`<br>
 action: returns bot latency in `ms`
 
-#### full gsheet
+#### assign name to gsheet link (only the ~~owner~~ admin can do)
+command: `$ts link <"link"> variableName`<br>
+action: assigns a name to the link provided by the admin
+
+#### full gsheet using defined name
+command: `$ts show variableName` <br>
+action: displays the whole table
+
+#### full gsheet using gsheet link
 command: `$ts show "<google sheet link>"`<br>
 action: displays the whole table
 
@@ -39,6 +47,6 @@ Install everything written in `requirements.txt` with pip install.
 
 `cd` to `tablot` directory.
 
-Create `.env` file and fill it with token
+change `cred` variable value to your `creds.json` values
 
-`BOT_TOKEN=<your token>`
+also put your discord bot token inside `client.run()`
