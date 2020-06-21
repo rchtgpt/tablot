@@ -33,11 +33,13 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 start_time = 0
 
+
 @client.event
 async def on_ready():
     print('i\'m ready to get back to work')
     global start_time
     start_time = time.time()
+
 
 @client.event
 async def on_member_join(member):
@@ -49,7 +51,7 @@ async def on_member_join(member):
         await member.create_dm()
         await member.dm_channel.send(
             f'''Hey {member.name}, welcome to the official server of {guild_name}
-        
+
 To use the various channels of {guild_name}, please introduce yourself in `#introductions` using the format given below.
         ```
 $ts introduce
@@ -77,17 +79,19 @@ email: "email_id" ```
 
     except Exception as e:
         print(e)
-    
+
+
 @client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
-        #if successful
-        sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
+        # if successful
+        sheet = gClient.open_by_url(
+            "https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         total = sheet.get_all_values()
         indi = message.content.split('\n')[1:]
         final_add = []
         for i in indi:
-            final_add.append(i.split(":")[1].strip()[1:-1]) #to remove quotes
+            final_add.append(i.split(":")[1].strip()[1:-1])  # to remove quotes
         print(final_add)
         sheet.insert_row(final_add, len(total) + 1)
         await message.channel.send("Information added successfully :grin:")
@@ -97,31 +101,36 @@ async def on_message(message):
 
         user = message.author
         try:
-            await user.add_roles(discord.utils.get(user.guild.roles, name = 'test'))
+            await user.add_roles(discord.utils.get(user.guild.roles, name='test'))
         except Exception:
-            await message.channel.send(f'@<{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
+            await message.channel.send(
+                f'@<{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
 
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
             global sheetVar, link
             a = message.content.split('"')
-            if len(a) == 3 and a[-1]!='':
+            if len(a) == 3 and a[-1] != '':
                 try:
                     try_sheet = gClient.open_by_url(a[1][1:-1]).sheet1
                 except Exception:
-                    await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
+                    await message.channel.send(
+                        'The command syntax is incorrect. Please use `$ts help` to check the commands.')
                 sheetVar = a[2].strip()
                 link = a[1][1:-1]
                 d[sheetVar] = link
                 await message.channel.send(f'the assigned variable is {sheetVar}')
             else:
-                await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
+                await message.channel.send(
+                    'The command syntax is incorrect. Please use `$ts help` to check the commands.')
         else:
             await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
 
-    for variables in d.keys():
-        if message.content == f'{prefix} show {variables}':
-            sheet = gClient.open_by_url(d[variables]).sheet1
+    for vars in d.keys():
+
+        if message.content == f'{prefix} show {vars}':
+            a = message.content.split()
+            sheet = gClient.open_by_url(d[vars]).sheet1
             data = sheet.get_all_values()
             tableData = [data[0]]
             for i in range(1, len(data)):
@@ -130,19 +139,54 @@ async def on_message(message):
             table = AsciiTable(tableData)
             await message.channel.send(f'```{table.table}```')
 
+        elif f'{prefix} show {vars} row' in message.content:
+            a = message.content.split(" ", 4)
+            if len(a) > 3:
+                sheet = gClient.open_by_url(d[vars]).sheet1
+                data = sheet.findall(a[-1])
+                tableData = list()
+                tableData.append(sheet.row_values(1))
+                for i in data:
+                    tableData.append(sheet.row_values(i.row))
+                final = ''
+                for i in tableData:
+                    if tableData[tableData.index(i)] == tableData[-1]:
+                        break
+                    else:
+                        for j in range(len(i)):
+                            final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
+                        await message.channel.send(f'```{final}```')
+                        final = ''
+
+        elif f'{prefix} show {vars} col' in message.content:
+            a = message.content.split(" ", 4)
+            if len(a) > 3:
+                sheet = gClient.open_by_url(d[vars]).sheet1
+                tableData = sheet.row_values(1)
+                final = ''
+                if a[-1] in tableData:
+                    table = tableData.index(a[-1])
+                    print(table)
+                    colVals = sheet.col_values(table + 1)
+                    lst = []
+                    for i in colVals:
+                        lst.append([i])
+                    await message.channel.send(f'```{AsciiTable(lst).table}```')
+                else:
+                    await message.channel.send('bro this column doesn\'t exist, please recheck :sweat_smile:')
+
     if message.content.startswith(f'{prefix} show ') and '"' in message.content:
         if message.content[-1] != '"':
             a = message.content.split('"')
             if len(a) < 3:
-                await message.channel.send('The command syntax is incorrect. Please use `$ts help` to check the commands.')
+                await message.channel.send(
+                    'The command syntax is incorrect. Please use `$ts help` to check the commands.')
             else:
                 try:
-                    a = message.content.split('"')
-                    print(a)
                     link = a[1][1:-1]
                     sheet = gClient.open_by_url(link).sheet1
                     data = sheet.findall(a[2][1:])
-                    tableData = []
+                    tableData = list()
                     tableData.append(sheet.row_values(1))
                     for i in data:
                         tableData.append(sheet.row_values(i.row))
@@ -156,7 +200,8 @@ async def on_message(message):
                             await message.channel.send(f'```{final}```')
                             final = ''
                 except:
-                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
+                    await message.channel.send(
+                        'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
         else:
             try:
@@ -174,23 +219,25 @@ async def on_message(message):
                     await message.channel.send(f'```{table.table}```')
 
                 else:
-                    await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
+                    await message.channel.send(
+                        'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
             except Exception as e:
-                await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
+                await message.channel.send(
+                    'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
                               description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` for a list of commands',
                               colour=1499502) \
             .add_field(
-                name='Tablot',
-                value='Tablot helps you conveniently display your google sheets data on a discord server.',
-                inline=False).add_field(
-                name='Owner',
-                value='Tech Syndicate; check us out on [GitHub](https://github.com/techsyndicate).',
-                inline=False
-            ).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
+            name='Tablot',
+            value='Tablot helps you conveniently display your google sheets data on a discord server.',
+            inline=False).add_field(
+            name='Owner',
+            value='Tech Syndicate; check us out on [GitHub](https://github.com/techsyndicate).',
+            inline=False
+        ).set_footer(text='Made by Tech Syndicate', icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
     if message.content.startswith(f'{prefix} stats'):
@@ -221,9 +268,9 @@ async def on_message(message):
             inline=True
         ).add_field(
             name='Uptime',
-            value=datetime.timedelta(seconds=difference))\
-                .set_footer(text='Made by Tech Syndicate',
-                icon_url='https://techsyndicate.co/img/logo.png')
+            value=datetime.timedelta(seconds=difference)) \
+            .set_footer(text='Made by Tech Syndicate',
+                        icon_url='https://techsyndicate.co/img/logo.png')
         await message.channel.send(embed=embed)
 
     if message.content.startswith(f'{prefix} help'):
@@ -232,14 +279,10 @@ async def on_message(message):
             colour=1499502,
             description="""
 > To use a command, type `$ts <command>`.
-
 **General:**
-
 `about` - To know about the bot.
 `stats` - To check the bot's stats.
-
 **Google Sheets:**
-
 `link "<link>" variable_name` - To assign a variable to the link (only server owner)
 `show variable_name` - To display the table stored in the variable
 `show "<link>"` - To display the whole table
