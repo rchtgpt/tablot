@@ -33,13 +33,11 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(cred)
 gClient = gspread.authorize(creds)
 start_time = 0
 
-
 @client.event
 async def on_ready():
     print('i\'m ready to get back to work')
     global start_time
     start_time = time.time()
-
 
 @client.event
 async def on_member_join(member):
@@ -80,13 +78,11 @@ email: "email_id" ```
     except Exception as e:
         print(e)
 
-
 @client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
         # if successful
-        sheet = gClient.open_by_url(
-            "https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
+        sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         total = sheet.get_all_values()
         indi = message.content.split('\n')[1:]
         final_add = []
