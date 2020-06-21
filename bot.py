@@ -90,7 +90,7 @@ async def on_message(message):
             final_add.append(i.split(":")[1].strip()[1:-1])  # to remove quotes
         print(final_add)
         sheet.insert_row(final_add, len(total) + 1)
-        await message.channel.send("Information added successfully :grin:")
+        await message.channel.send("Information added successfully :grinning:")
 
         # put registered users uid in database
         # use if to check if the user has already done it
@@ -100,7 +100,7 @@ async def on_message(message):
             await user.add_roles(discord.utils.get(user.guild.roles, name='test'))
         except Exception:
             await message.channel.send(
-                f'@<{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
+                f'<@{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
 
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
@@ -222,6 +222,7 @@ async def on_message(message):
                 await message.channel.send(
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
+
     if message.content.startswith(f'{prefix} about'):
         embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
                               description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` for a list of commands',
@@ -275,10 +276,14 @@ async def on_message(message):
             colour=1499502,
             description="""
 > To use a command, type `$ts <command>`.
+
 **General:**
+
 `about` - To know about the bot.
 `stats` - To check the bot's stats.
+
 **Google Sheets:**
+
 `link "<link>" variable_name` - To assign a variable to the link (only server owner)
 `show variable_name` - To display the table stored in the variable
 `show "<link>"` - To display the whole table
