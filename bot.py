@@ -82,8 +82,24 @@ email: "email_id" ```
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
         #if successful
+        sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
+        total = sheet.get_all_values()
+        indi = message.content.split('\n')[1:]
+        final_add = []
+        for i in indi:
+            final_add.append(i.split(":")[1].strip()[1:-1]) #to remove quotes
+        print(final_add)
+        sheet.insert_row(final_add, len(total) + 1)
+        await message.channel.send("Information added successfully :grin:")
+
+        # put registered users uid in database
+        # use if to check if the user has already done it
+
         user = message.author
-        await user.add_roles(discord.utils.get(user.guild.roles, name = 'test'))
+        try:
+            await user.add_roles(discord.utils.get(user.guild.roles, name = 'test'))
+        except Exception:
+            await message.channel.send(f'@<{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
 
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
