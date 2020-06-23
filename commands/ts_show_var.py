@@ -26,6 +26,7 @@ def show_var_row(a, gClient, doc, var):
         for i in data:
             tableData.append(sheet.row_values(i.row))
         final = ''
+        print(tableData)
         for i in tableData:
             if tableData[tableData.index(i)] == tableData[-1]:
                 break
@@ -33,7 +34,7 @@ def show_var_row(a, gClient, doc, var):
                 final = ''
                 for j in range(len(i)):
                     final += f'{tableData[0][j]}: {tableData[tableData.index(i) + 1][j]}\n'
-                #return final
+                print(final)
                 yield final
             
 def show_var_col(a, gClient, doc, var):

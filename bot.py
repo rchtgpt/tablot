@@ -110,6 +110,7 @@ email: "email_id" ```
 
 @client.event
 async def on_message(message):
+
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
         sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         indi = message.content.split('\n')[1:]
@@ -130,19 +131,23 @@ async def on_message(message):
         if message.author == message.guild.owner:
             a = message.content.split('"')
             if len(a) == 3 and a[-1] != '':
-                try:
-                    try_sheet = gClient.open_by_url(a[1][1:-1]).sheet1
-                except Exception:
-                    await message.channel.send(
-                        'The command syntax is incorrect. Please use `$ts help` to check the commands.')               
-                from commands.ts_link import link
-                sheetVar = link(a, db, message.guild.id)
-                await message.channel.send(f'the assigned variable is `{(str(sheetVar))}`')
+                j = a[1]
+                if j[1] == '<' and j[-1] == '>':
+                    try:
+                        try_sheet = gClient.open_by_url(a[1][1:-1]).sheet1
+                        from commands.ts_link import link
+                        sheetVar = link(a, db, message.guild.id)
+                        await message.channel.send(f'the assigned variable is `{(str(sheetVar))}`')
+                    except Exception:
+                        await message.channel.send(
+                            'The command syntax is incorrect. Please use `$ts help` to check the commands.')
+                else:
+                    await message.channel.send("i think you forgot to put '<' and '>' before and after your link :thinking:")
             else:
                 await message.channel.send(
                     'The command syntax is incorrect. Please use `$ts help` to check the commands.')
         else:
-            await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
+            await message.channel.send(f'this command is only for <@{message.guild.owner.id}>. pls don\'t use it. kthxbye.')
 
     if f'{prefix} show' in message.content and '"' not in message.content:
         doc = return_doc(db, message.guild.id)
@@ -154,8 +159,13 @@ async def on_message(message):
 
                 elif f'{prefix} show {var} row' in message.content or f'{prefix} show {var} --r' in message.content:
                     a = message.content.split(" ", 4)
-                    for final in show_var_row(a, gClient, doc, var):
-                        await message.channel.send(f'```{final}```')
+                    sheet = gClient.open_by_url(doc[var]).sheet1
+                    data = sheet.findall(a[-1])
+                    if len(data) < 1:
+                        await message.channel.send(f'i\'m unable to find `{a[-1]}` in {var} :thinking:')
+                    else:
+                        for final in show_var_row(a, gClient, doc, var):
+                            await message.channel.send(f'```{final}```')
 
                 elif f'{prefix} show {var} col' in message.content or f'{prefix} show {var} --c' in message.content:
                     a = message.content.split(" ", 4)
@@ -177,13 +187,22 @@ async def on_message(message):
                 try:
                     link = a[1][1:-1]
                     if message.content.startswith(f'{prefix} show "<{link}>" row ') or message.content.startswith(f'{prefix} show "<{link}>" --r '):
-                        for final in display_row(gClient, link, message.content):
-                            await message.channel.send(f'```{final}```')
+                        sheet = gClient.open_by_url(link).sheet1
+                        j = message.content.split(" ", 5)
+                        data = sheet.findall(j[-1])
+                        if len(data) < 1:
+                            await message.channel.send(f'i\'m unable to find `{j[-1]}` in <{link}> :thinking:')
+                        else:
+                            for final in display_row(gClient, link, message.content):
+                                await message.channel.send(f'```{final}```')
                                 
                     elif message.content.startswith(f'{prefix} show "<{link}>" col ') or message.content.startswith(f'{prefix} show "<{link}>" --c '):
                         j = message.content.split(" ", 5)
                         lst = display_col(gClient, j, link)
-                        await message.channel.send(f'```{AsciiTable(lst).table}```')
+                        if lst == 'error':
+                            await message.channel.send('bro this column doesn\'t exist, please recheck :sweat_smile:')
+                        else:
+                            await message.channel.send(f'```{AsciiTable(lst).table}```')
                 except:
                     await message.channel.send(
                         'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
@@ -191,13 +210,16 @@ async def on_message(message):
         else:
             try:
                 a = message.content.split('"')
-                link = a[1][1:-1]
-                if link.startswith('https://docs.google.com/spreadsheets/d/'):
-                    table = display_link(gClient, link)
-                    await message.channel.send(f'```{table.table}```')
+                link = a[1]
+                if link[1] == '<' and link[-1] == '>':
+                    link = a[1][1:-1]
+                    if link.startswith('https://docs.google.com/spreadsheets/d/'):
+                        table = display_link(gClient, link)
+                        await message.channel.send(f'```{table.table}```')
+                    else:
+                        await message.channel.send('Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
                 else:
-                    await message.channel.send(
-                        'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
+                    await message.channel.send("i think you forgot to put '<' and '>' before and after your link :thinking:")
             except Exception as e:
                 await message.channel.send(
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
@@ -232,6 +254,7 @@ async def on_message(message):
             await message.channel.send(embed=embed)
         else:
             await message.channel.send(f'this command is only for <@{message.guild.owner.id}>. pls leave me alone :sweat_smile:')
+
 
 client.run(os.environ.get('TOKEN'))
 

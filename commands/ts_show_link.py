@@ -28,6 +28,8 @@ def display_col(gClient, j, link):
         for i in colVals:
             lst.append([i])
         return lst
+    else:
+        return 'error'
 
 def display_link(gClient, link):
     sheet = gClient.open_by_url(link).sheet1
