@@ -16,6 +16,7 @@ from commands.ts_show_link import display_col
 from commands.ts_show_link import display_link
 from commands.ts_stats import stats
 from commands.ts_help import help, help_owner
+from commands.ts_introduce import intro
 
 client = discord.Client()
 prefix = '$ts'
@@ -112,7 +113,6 @@ async def on_message(message):
 
         sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         indi = message.content.split('\n')[1:]
-        from commands.ts_introduce import intro
         intro = intro(indi, db, message.guild.id, message.author, message.author.id, sheet)
         if intro == 'add':
             await message.channel.send("Information added successfully :grinning:")
@@ -201,6 +201,14 @@ async def on_message(message):
                 await message.channel.send(
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
+    if message.content == f'{prefix} all':
+        from commands.ts_all import all_vars
+        try:
+            var = all_vars(db, message.guild.id)
+            await message.channel.send(f'```{var}```')
+        except:
+            await message.channel.send('mate at least add some variables first :sweat:')
+    
     if message.content == prefix:
         embed = about()
         await message.channel.send(embed=embed)
