@@ -17,6 +17,7 @@ from commands.ts_show_link import display_link
 from commands.ts_stats import stats
 from commands.ts_help import help, help_owner
 from commands.ts_introduce import intro
+from commands.ts_all import all_vars
 
 client = discord.Client()
 prefix = '$ts'
@@ -110,11 +111,10 @@ email: "email_id" ```
 @client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
-
         sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         indi = message.content.split('\n')[1:]
-        intro = intro(indi, db, message.guild.id, message.author, message.author.id, sheet)
-        if intro == 'add':
+        introd = intro(indi, db, message.guild.id, message.author, message.author.id, sheet)
+        if introd == 'add':
             await message.channel.send("Information added successfully :grinning:")
         else:
             await message.channel.send("Information updated successfully :grinning:")
@@ -122,8 +122,9 @@ async def on_message(message):
         try:
             await user.add_roles(discord.utils.get(user.guild.roles, name='test'))
         except Exception:
-            await message.channel.send(
-                f'<@{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
+            if introd == 'add':
+                await message.channel.send(
+                    f'<@{message.guild.owner.id}>, pls add the bot role above the desired role to be given')
 
     if message.content.startswith(f'{prefix} link'):
         if message.author == message.guild.owner:
@@ -202,7 +203,6 @@ async def on_message(message):
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
     if message.content == f'{prefix} all':
-        from commands.ts_all import all_vars
         try:
             var = all_vars(db, message.guild.id)
             await message.channel.send(f'```{var}```')
@@ -234,4 +234,5 @@ async def on_message(message):
             await message.channel.send(f'this command is only for <@{message.guild.owner.id}>. pls leave me alone :sweat_smile:')
 
 client.run(os.environ.get('TOKEN'))
+
 # email: techsyndicate@tablot-280818.iam.gserviceaccount.com
