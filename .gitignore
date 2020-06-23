@@ -1,3 +1,4 @@
 .idea/
 .env
 creds.json
+commands/__pycache__/

@@ -21,7 +21,7 @@ we are working on this just for the sake of getting familiarized with <a href='h
 ### general commands
 
 **about**
-command: `$ts about` <br>
+command: `$ts` <br>
 action: bot introduces itself
 
 **ping**
@@ -39,11 +39,13 @@ action: displays the whole table
 
 **gsheet link specific rows**
 command: `$ts show "<google sheet link>" row value`<br>
-action: displays rows belonging to the specified value
+action: displays rows belonging to the specified value<br>
+(you can use `--r` instead of `row`)
 
 **gsheet link specific columns**
 command: `$ts show "<google sheet link>" col value`<br>
 action: displays a specific column using column name
+(you can use `--c` instead of `col`)
 
 #### using owner defined link variable
 
@@ -58,10 +60,12 @@ action: displays the whole table
 **gsheet linkVariable specific rows**
 command: `$ts show linkVariable row value`<br>
 action: displays rows belonging to the specified value
+(you can use `--r` instead of `row`)
 
 **gsheet link specific columns**
 command: `$ts show linkVariable col value`<br>
 action: displays a specific column using column name as value
+(you can use `--c` instead of `col`)
 
 
 ## building from source

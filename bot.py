@@ -3,9 +3,19 @@ import os
 from terminaltables import AsciiTable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import datetime, time
+import time
 import firebase_admin
 from firebase_admin import credentials, firestore
+from commands.ts_about import about
+from commands.ts_show_var import return_doc
+from commands.ts_show_var import show_var
+from commands.ts_show_var import show_var_row
+from commands.ts_show_var import show_var_col
+from commands.ts_show_link import display_row
+from commands.ts_show_link import display_col
+from commands.ts_show_link import display_link
+from commands.ts_stats import stats
+from commands.ts_help import help, help_owner
 
 client = discord.Client()
 prefix = '$ts'
@@ -42,6 +52,23 @@ async def on_ready():
     print('i\'m ready to get back to work')
     global start_time
     start_time = time.time()
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you type $ts"))
+
+
+@client.event
+async def on_guild_join(guild):
+    if guild.system_channel == None:
+        try:
+            channel = discord.utils.get(guild.text_channels, name="general")
+            embed = about()
+            await channel.send(embed=embed)
+        except:
+            embed = about()
+            await guild.channel.send(embed=embed)
+    else:
+        embed = about()
+        await guild.system_channel.send(embed=embed)
+
 
 @client.event
 async def on_member_join(member):
@@ -82,9 +109,10 @@ email: "email_id" ```
 @client.event
 async def on_message(message):
     if message.content.startswith(f'{prefix} introduce') and str(message.channel) == 'introductions':
-        from commands.ts_introduce import intro 
+
         sheet = gClient.open_by_url("https://docs.google.com/spreadsheets/d/1rCIv4UG3s1QFhCOZFMNmVraksTVCILhCukL6dnaW0vA/edit?usp=sharing").sheet1
         indi = message.content.split('\n')[1:]
+        from commands.ts_introduce import intro
         intro = intro(indi, db, message.guild.id, message.author, message.author.id, sheet)
         if intro == 'add':
             await message.channel.send("Information added successfully :grinning:")
@@ -116,24 +144,20 @@ async def on_message(message):
             await message.channel.send(f'this command is only for {message.guild.owner}. pls don\'t use it. kthxbye.')
 
     if f'{prefix} show' in message.content and '"' not in message.content:
-        from commands.ts_show_var import return_doc
         doc = return_doc(db, message.guild.id)
         try:
             for var in doc:
                 if message.content == f'{prefix} show {var}':
-                    from commands.ts_show_var import show_var
                     table = show_var(gClient, doc, var)
                     await message.channel.send(f'```{table.table}```')
 
-                elif f'{prefix} show {var} row' in message.content:
+                elif f'{prefix} show {var} row' in message.content or f'{prefix} show {var} --r' in message.content:
                     a = message.content.split(" ", 4)
-                    from commands.ts_show_var import show_var_row
                     for final in show_var_row(a, gClient, doc, var):
                         await message.channel.send(f'```{final}```')
 
-                elif f'{prefix} show {var} col' in message.content:
+                elif f'{prefix} show {var} col' in message.content or f'{prefix} show {var} --c' in message.content:
                     a = message.content.split(" ", 4)
-                    from commands.ts_show_var import show_var_col
                     lst = show_var_col(a, gClient, doc, var)
                     if lst == 'error':
                         await message.channel.send('bro this column doesn\'t exist, please recheck :sweat_smile:')
@@ -151,14 +175,12 @@ async def on_message(message):
             else:
                 try:
                     link = a[1][1:-1]
-                    if message.content.startswith(f'{prefix} show "<{link}>" row '):
-                        from commands.ts_show_link import display_row
+                    if message.content.startswith(f'{prefix} show "<{link}>" row ') or message.content.startswith(f'{prefix} show "<{link}>" --r '):
                         for final in display_row(gClient, link, message.content):
                             await message.channel.send(f'```{final}```')
                                 
-                    elif message.content.startswith(f'{prefix} show "<{link}>" col '):
+                    elif message.content.startswith(f'{prefix} show "<{link}>" col ') or message.content.startswith(f'{prefix} show "<{link}>" --c '):
                         j = message.content.split(" ", 5)
-                        from commands.ts_show_link import display_col
                         lst = display_col(gClient, j, link)
                         await message.channel.send(f'```{AsciiTable(lst).table}```')
                 except:
@@ -170,7 +192,6 @@ async def on_message(message):
                 a = message.content.split('"')
                 link = a[1][1:-1]
                 if link.startswith('https://docs.google.com/spreadsheets/d/'):
-                    from commands.ts_show_link import display_link
                     table = display_link(gClient, link)
                     await message.channel.send(f'```{table.table}```')
                 else:
@@ -180,13 +201,11 @@ async def on_message(message):
                 await message.channel.send(
                     'Please enter a valid google sheet link. Also, if you haven\'t already, please share your google sheet with `techsyndicate@tablot-280818.iam.gserviceaccount.com`.')
 
-    if message.content.startswith(f'{prefix} about'):
-        from commands.ts_about import about
+    if message.content == prefix:
         embed = about()
         await message.channel.send(embed=embed)
 
-    if message.content.startswith(f'{prefix} stats'): 
-        from commands.ts_stats import stats
+    if message.content.startswith(f'{prefix} stats'):
         name_list = set()
         for g in client.guilds:
             for s in g.members:
@@ -195,11 +214,16 @@ async def on_message(message):
         embed = stats(start_time, time.time(), name_list, latency, client.guilds)
         await message.channel.send(embed=embed)
 
-    if message.content.startswith(f'{prefix} help'):
-        from commands.ts_help import help
+    if message.content == f'{prefix} help':
         embed = help()
         await message.channel.send(embed=embed)
 
-client.run(os.environ.get('TOKEN'))
+    elif message.content == f'{prefix} help owner':
+        if message.author == message.guild.owner:
+            embed = help_owner()
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send(f'this command is only for <@{message.guild.owner.id}>. pls leave me alone :sweat_smile:')
 
+client.run(os.environ.get('TOKEN'))
 # email: techsyndicate@tablot-280818.iam.gserviceaccount.com

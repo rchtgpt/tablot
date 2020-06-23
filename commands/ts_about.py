@@ -3,7 +3,7 @@ client = discord.Client()
 
 def about():
     embed = discord.Embed(title='Thanks for adding me to your server! :heart:',
-                            description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` for a list of commands.',
+                            description='To get started, simply share your google sheet with me at `techsyndicate@tablot-280818.iam.gserviceaccount.com`, and type `$ts help` (or `$ts help owner` if you\'re the owner) for a list of commands.',
                             colour=1499502) \
         .add_field(
         name='Tablot',
