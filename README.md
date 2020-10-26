@@ -69,7 +69,7 @@ action: displays a specific column using column name as value
 
 
 ## building from source
-Install everything written in `requirements.txt` with pip install.
+Install everything written in `requirements.txt` with `pip install -r requirements.txt`.
 
 `cd` to `tablot` directory.
 
